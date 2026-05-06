@@ -17,10 +17,12 @@ import {
   isSurveyItem,
   readSurveyData,
 } from '@gratis-gis/shared-types';
+import type { FormSchema } from '@gratis-gis/form-schema';
 import type { CustomBasemap } from '@/lib/custom-basemap';
 import { apiFetch, hasSession, publicApiFetch } from '@/lib/api';
 import {
   buildEditorMapData,
+  editorTargetLayerId,
   type ResolvedTarget,
 } from '../../editor/build-map-data';
 import { EditorRuntime } from '../../editor/editor-runtime';
@@ -89,6 +91,12 @@ interface FormShape {
   /** When the paired layer has multiple sublayers, the specific
    *  layer this form maps onto. Single-layer pairs omit this. */
   linkedLayerKey?: string;
+  /** Schema fields used by the FormView side panel (#320). The form
+   *  item's `data` is a full FormSchema; we read the same fields back
+   *  out here without restating the entire question union locally. */
+  schemaVersion?: number;
+  questions?: FormSchema['questions'];
+  title?: string;
 }
 
 /**
@@ -317,6 +325,17 @@ export default async function SurveyRuntimePage({ params }: Props) {
     if (it && it.data) pickLists[it.id] = it.data as PickListData;
   }
 
+  // #320: hand the FormView side panel a real schema + the synthesized
+  // target-layer id (the runtime has the layer under that id, not the
+  // raw paired data_layer id). Reading off formItem.data: the form
+  // item stores its full FormSchema there, so we can pass it through
+  // without an extra fetch.
+  const formViewSchema: FormSchema | null =
+    formItem && formItem.data && (formItem.data as { questions?: unknown }).questions
+      ? (formItem.data as unknown as FormSchema)
+      : null;
+  const surveyTargetLayerId = editorTargetLayerId(dataLayerItem.id, layerKey);
+
   return (
     <EditorRuntime
       editorId={surveyItem.id}
@@ -330,6 +349,8 @@ export default async function SurveyRuntimePage({ params }: Props) {
       basemaps={basemaps}
       canEdit={false}
       printEnabled={survey.tools.includes('print')}
+      formViewSchema={formViewSchema}
+      surveyTargetLayerId={surveyTargetLayerId}
     />
   );
 }
