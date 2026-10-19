@@ -50,7 +50,7 @@
     "passport-jwt": "^4.0.1",
     "pg": "^8.21.0",
     "pg-copy-streams": "^7.0.0",
-    "pmtiles": "^3.2.1",
+    "pmtiles": "^4.5.0",
     "proj4": "^2.20.9",
     "puppeteer-core": "^24.0.0",
     "reflect-metadata": "^0.2.2",
