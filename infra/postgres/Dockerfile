@@ -16,7 +16,7 @@
 # fresh 17 instance. The old data dir is preserved as
 # /var/lib/docker/volumes/gratis-gis-prod_pgdata/_data.pg16.backup
 # in case the restore needs to be reverted.
-FROM postgis/postgis:17-3.5
+FROM postgis/postgis:18-3.6
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
